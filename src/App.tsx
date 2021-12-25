@@ -2,7 +2,7 @@ import { MdAddShoppingCart, MdOutlineCheck } from 'react-icons/md'
 import { IoMdTrash } from 'react-icons/io'
 
 import { db } from './services/firebase'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
 type ProductProps = {
@@ -13,6 +13,8 @@ type ProductProps = {
 }
 
 function App() {
+  const [description, setDescription] = useState('');
+  const [quantity, setQuantity] = useState(0);
   const [products, setProducts] = useState<ProductProps[]>([]);
 
   
@@ -36,6 +38,18 @@ function App() {
       loadData()
     }, [])
 
+    async function handleAddProduct() {
+      await addDoc(collection(db, 'products'), {
+        description,
+        quantity,
+        done: false
+      })
+    }
+
+    async function handleDeleteProduct(id: string) {
+      await deleteDoc(doc(db, 'products', id))
+    }
+
   return (
     <>
       <div className="w-full h-24 bg-purple-700 flex items-end py-6 justify-center">
@@ -46,14 +60,20 @@ function App() {
         <input 
           type="text" 
           placeholder="Nome do produto"
-          className="bg-gray-200 h-16 rounded-md px-2 w-3/4" 
+          className="bg-gray-200 h-16 rounded-md px-2 w-3/4"
+          value={description} 
+          onChange={event => setDescription(event.target.value)}
         />
         <input 
           type="text" 
           placeholder="0"
-          className="bg-gray-200 h-16 w-12 rounded-md text-center" 
+          className="bg-gray-200 h-16 w-12 rounded-md text-center"
+          onChange={event => setQuantity(Number(event.target.value))} 
         />
-        <button className="bg-green-600 text-white text-2xl h-16 w-12 rounded-md flex items-center justify-center">
+        <button
+          onClick={handleAddProduct}
+          className="bg-green-600 text-white text-2xl h-16 w-12 rounded-md flex items-center justify-center"
+        >
           <MdAddShoppingCart />
         </button>
       </div>
@@ -68,7 +88,10 @@ function App() {
           <button className="bg-green-600 text-white p-2 rounded-md">
             <MdOutlineCheck />
           </button>
-          <button className="bg-red-600 text-white p-2 rounded-md">
+          <button
+            onClick={() => {handleDeleteProduct(product.id)}} 
+            className="bg-red-600 text-white p-2 rounded-md"
+          >
             <IoMdTrash />
           </button>
         </div>
