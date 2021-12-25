@@ -1,8 +1,8 @@
 import { MdAddShoppingCart, MdOutlineCheck } from 'react-icons/md'
 import { IoMdTrash } from 'react-icons/io'
 
-import { firebase, db } from './services/firebase'
-import { collection, getDocs } from 'firebase/firestore'
+import { db } from './services/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
 type ProductProps = {
@@ -19,15 +19,18 @@ function App() {
     useEffect(() => {
       async function loadData() {
         const docRef = collection(db, "products");
-        const productsSnapshot = await getDocs(docRef);
-        const productsList = productsSnapshot.docs.map(doc => {
-          return {
-            id: doc.id, 
-            ...doc.data() 
-          }
-        }) as ProductProps[]
-        
-        setProducts(productsList)
+        const unsubscribe = onSnapshot(docRef, (querySnapshot) => {
+          const data = querySnapshot.docs.map(doc => {
+            return {
+              id: doc.id, 
+              ...doc.data() 
+            }
+          }) as ProductProps[]
+
+          setProducts(data)
+        })
+
+        return () => { unsubscribe() }
       }
 
       loadData()
