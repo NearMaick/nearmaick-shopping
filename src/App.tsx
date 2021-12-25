@@ -1,8 +1,8 @@
 import { MdAddShoppingCart, MdOutlineCheck } from 'react-icons/md'
-import { IoMdTrash } from 'react-icons/io'
+import { IoMdTrash, IoMdReturnLeft } from 'react-icons/io'
 
 import { db } from './services/firebase'
-import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
 type ProductProps = {
@@ -46,6 +46,12 @@ function App() {
       })
     }
 
+    async function handleToggleDone(id: string, done: boolean) {
+      await updateDoc(doc(db, 'products', id), {
+        done: !done
+      })
+    }
+
     async function handleDeleteProduct(id: string) {
       await deleteDoc(doc(db, 'products', id))
     }
@@ -85,8 +91,11 @@ function App() {
           <span className="font-thin text-gray-400">{`Quantidade: ${product.quantity}`}</span>
         </div>
         <div className="flex flex-col h-full justify-around">
-          <button className="bg-green-600 text-white p-2 rounded-md">
-            <MdOutlineCheck />
+          <button
+            onClick={() => {handleToggleDone(product.id, product.done)}} 
+            className="bg-green-600 text-white p-2 rounded-md"
+          >
+            {product.done ? <IoMdReturnLeft /> : <MdOutlineCheck />}
           </button>
           <button
             onClick={() => {handleDeleteProduct(product.id)}} 
