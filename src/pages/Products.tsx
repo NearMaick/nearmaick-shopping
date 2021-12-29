@@ -17,24 +17,23 @@ export function Products() {
   const [quantity, setQuantity] = useState(0);
   const [products, setProducts] = useState<ProductProps[]>([]);
 
+  async function loadData() {
+    const docRef = collection(db, "products");
+    const unsubscribe = onSnapshot(docRef, (querySnapshot) => {
+      const data = querySnapshot.docs.map(doc => {
+        return {
+          id: doc.id, 
+          ...doc.data() 
+        }
+      }) as ProductProps[]
+
+      setProducts(data)
+    })
+
+    return () => { unsubscribe() }
+  }
   
     useEffect(() => {
-      async function loadData() {
-        const docRef = collection(db, "products");
-        const unsubscribe = onSnapshot(docRef, (querySnapshot) => {
-          const data = querySnapshot.docs.map(doc => {
-            return {
-              id: doc.id, 
-              ...doc.data() 
-            }
-          }) as ProductProps[]
-
-          setProducts(data)
-        })
-
-        return () => { unsubscribe() }
-      }
-
       loadData()
     }, [])
 
