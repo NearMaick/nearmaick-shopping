@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 import { uploadBytesResumable, ref, list, getDownloadURL } from 'firebase/storage'
 import { storage } from "../services/firebase";
 
 export function PhotoUpload() {
   const [selectedImage, setSelectedImage] = useState<any>();
-  const [urls, setUrls] = useState<{ path: string }[]>([]);
+  const [urls, setUrls] = useState<string[]>([]);
 
-  const imageChange = (event: any) => {
+  const imageChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
     if (!event.target) return;
     if (event.target.files && event.target.files.length > 0) {
