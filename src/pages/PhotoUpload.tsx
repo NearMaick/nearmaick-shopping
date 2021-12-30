@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import 'firebase/storage'
 
 import { uploadBytesResumable, ref, getDownloadURL, list } from 'firebase/storage'
 import { storage } from "../services/firebase";
@@ -9,8 +8,16 @@ type FileProps = ArrayBuffer & {
 }
 
 export function PhotoUpload() {
-  const [selectedFile, setSelectedFile] = useState<FileProps>();
   const [photos, setPhotos] = useState<{ name: string; path: string; }[]>([])
+  const [selectedImage, setSelectedImage] = useState<any>();
+
+  const imageChange = (event: any) => {
+    event.preventDefault()
+    if (!event.target) return;
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedImage(event.target.files[0]);
+    }
+  };
 
   
 async function loadPhotos() {
@@ -36,10 +43,10 @@ async function loadPhotos() {
  }, [])
 
   async function handleUploadPhoto() {
-      if (!selectedFile) return;
+      if (!selectedImage) return;
 
-      const storageRef = ref(storage, `/images/${selectedFile.name}.png`);
-      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+      const storageRef = ref(storage, `/images/${selectedImage.name}.png`);
+      const uploadTask = uploadBytesResumable(storageRef, selectedImage);
 
     uploadTask.on('state_changed', taskSnapshot => {
       const percent = ((taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100).toFixed(0);
@@ -54,41 +61,43 @@ async function loadPhotos() {
   }
 
   function handleProgressUploadImage() {
-    if (!selectedFile) return;
+    if (!selectedImage) return;
 
-    const storageRef = ref(storage, `img/${selectedFile.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+    const storageRef = ref(storage, `img/${selectedImage.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, selectedImage);
 
     return uploadTask
 	};
 
-  async function handlePickImage(event: Event) {
-    event.preventDefault()
-    console.log(event.target.files[0])
-    setSelectedFile(event.target.files[0])
-  //  if(!selectedFile) return
-   const storageRef = ref(storage, `/images/${event.target.files[0].name}.png`);
-    const urlImage = await getDownloadURL(storageRef);
-    console.log(urlImage)
+  // async function handlePickImage(event: Event) {
+  //   event.preventDefault()
+  //   console.log(event.target.files[0])
+  //   setSelectedFile(event.target.files[0])
+  // //  if(!selectedFile) return    const storageRef = ref(storage, `/images/${event.target.files[0].name}.png`);
+  //   const urlImage = await getDownloadURL(storageRef);
+  //   console.log(urlImage)
 
-    // const info = await storage().ref(path).getMetadata()
-    // setPhotoInfo(`Upload realizado em ${info.timeCreated}`)
-  }
+  //   // const info = await storage().ref(path).getMetadata()
+  //   // setPhotoInfo(`Upload realizado em ${info.timeCreated}`)
+  // }
 
   return (
     <>
-      <label htmlFor="avatar">
-        Escolha uma imagem
-      </label>
-      <img src="" alt="" />
+      <>
       <input
-        className="block px-3 py-1.5 border border-solid border-gray-300 rounded" 
-        type="file"
-        id="avatar"
-        name="avatar"
         accept="image/*"
-        onChange={(event: any) => {handlePickImage(event)}}
-        />
+        type="file"
+        onChange={imageChange}
+      />
+      {selectedImage && (
+          <div >
+            <img
+              src={URL.createObjectURL(selectedImage)}              
+              alt="Thumb"
+            />            
+          </div>
+        )}
+      </>
       <button onClick={handleUploadPhoto}>Fazer Upload</button>
     </>
   )
