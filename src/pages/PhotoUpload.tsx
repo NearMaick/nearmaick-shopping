@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { uploadBytesResumable, ref, getDownloadURL, list } from 'firebase/storage'
+import { uploadBytesResumable, ref, list, getDownloadURL } from 'firebase/storage'
 import { storage } from "../services/firebase";
 
-type FileProps = ArrayBuffer & {
-  name: string
-}
-
 export function PhotoUpload() {
-  const [photos, setPhotos] = useState<{ name: string; path: string; }[]>([])
   const [selectedImage, setSelectedImage] = useState<any>();
+  const [urls, setUrls] = useState<{ path: string }[]>([]);
 
   const imageChange = (event: any) => {
     event.preventDefault()
@@ -20,32 +16,32 @@ export function PhotoUpload() {
   };
 
   
-async function loadPhotos() {
-  const storageRef = ref(storage, `/images/`);
-  const listPhotos = list(storageRef)
+  async function loadPhotos(): Promise<void> {
+    let storageRef = ref(storage, '/images/');
 
-  listPhotos.then(photos => {
-    photos.items.forEach((file: { name: string; fullPath: string; }) => {
-      const files: { name: string; path: string; }[] = [];
+    const listPhotos = list(storageRef)
 
-      files.push({
-        name: file.name,
-        path: file.fullPath
-      })
-        setPhotos(files)
-      })
-    }) 
-  }
+    const listPhotosItems = (await listPhotos).items.map(file => {
+      return file.fullPath
+    })
 
- useEffect(() => {
-   loadPhotos()
-   console.log(handleProgressUploadImage())
- }, [])
+    const listPaths = listPhotosItems.map(url => {
+      return url
+    })
+
+    const listUrl = await Promise.all(listPaths.map(url => getDownloadURL(ref(storage, url))))
+    
+    setUrls(listUrl)    
+}
+
+  useEffect(() => {
+    loadPhotos()
+  }, [])
 
   async function handleUploadPhoto() {
       if (!selectedImage) return;
 
-      const storageRef = ref(storage, `/images/${selectedImage.name}.png`);
+      const storageRef = ref(storage, `/images/${selectedImage.name}`);
       const uploadTask = uploadBytesResumable(storageRef, selectedImage);
 
     uploadTask.on('state_changed', taskSnapshot => {
@@ -63,23 +59,11 @@ async function loadPhotos() {
   function handleProgressUploadImage() {
     if (!selectedImage) return;
 
-    const storageRef = ref(storage, `img/${selectedImage.name}`);
+    const storageRef = ref(storage, `images/${selectedImage.name}`);
     const uploadTask = uploadBytesResumable(storageRef, selectedImage);
 
     return uploadTask
-	};
-
-  // async function handlePickImage(event: Event) {
-  //   event.preventDefault()
-  //   console.log(event.target.files[0])
-  //   setSelectedFile(event.target.files[0])
-  // //  if(!selectedFile) return    const storageRef = ref(storage, `/images/${event.target.files[0].name}.png`);
-  //   const urlImage = await getDownloadURL(storageRef);
-  //   console.log(urlImage)
-
-  //   // const info = await storage().ref(path).getMetadata()
-  //   // setPhotoInfo(`Upload realizado em ${info.timeCreated}`)
-  // }
+	}; 
 
   return (
     <>
@@ -99,6 +83,13 @@ async function loadPhotos() {
         )}
       </>
       <button onClick={handleUploadPhoto}>Fazer Upload</button>
+      <div>
+        {urls.map(url => (
+          <>
+          <img key={url} src={url} alt="" />
+          </>
+        ))}
+      </div>
     </>
   )
 }
