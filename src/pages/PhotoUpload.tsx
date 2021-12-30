@@ -5,6 +5,7 @@ import { storage } from "../services/firebase";
 
 export function PhotoUpload() {
   const [selectedImage, setSelectedImage] = useState<Blob & { name: string }>();
+
   const [urls, setUrls] = useState<string[]>([]);
 
   const imageChange = (event: ChangeEvent<HTMLInputElement>) => {
