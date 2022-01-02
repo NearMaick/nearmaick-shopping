@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 
 import { uploadBytesResumable, ref } from 'firebase/storage'
 import { storage } from "../services/firebase";
+import { Header } from "../components/Header";
 
 export function PhotoUpload() {
   const [selectedImage, setSelectedImage] = useState<Blob & { name: string }>();
@@ -36,25 +37,42 @@ export function PhotoUpload() {
   }
 
   return (
-    <>
+    <div className="flex flex-col">
+      <Header />
       <>
-        {selectedImage && (
-          <div>
-            <img
-              src={URL.createObjectURL(selectedImage)}              
-              alt="Thumb"
-            />            
-          </div>
-        )}
+        <div className="w-72 h-48 mx-auto my-4 rounded-md border-2 border-dashed">
+          {selectedImage && (
+            <div className="my-auto">
+              <img
+                src={URL.createObjectURL(selectedImage)}              
+                alt="Thumb"
+              />            
+            </div>
+          )}
+        </div>
         <input
+          className="block w-80 px-3 py-1.5 font-normal text-gray-400 border border-solid border-gray-300 rounded mx-auto"
           accept="image/*"
           type="file"
           onChange={imageChange}
         />
       </>
-      <button onClick={handleUploadPhoto}>Fazer Upload</button>
-      <h1>{progress}%</h1>
-      <h1>{bytesTransferred}</h1>
-    </>
+      <h1 
+        className="text-gray-400 font-medium mx-auto text-xl"
+      >
+        {progress}%
+      </h1>
+      <h1 
+        className="text-gray-400 font-medium mx-auto text-xl"
+      >
+        {bytesTransferred}.
+      </h1>
+      <button
+        onClick={handleUploadPhoto}
+        className="border-solid my-4 mx-auto rounded-md px-12 py-2 bg-green-400 text-white font-medium"
+      >
+        Fazer Upload
+      </button>
+    </div>
   )
 }
