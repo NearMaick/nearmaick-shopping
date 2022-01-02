@@ -6,6 +6,9 @@ import { storage } from "../services/firebase";
 export function PhotoUpload() {
   const [selectedImage, setSelectedImage] = useState<Blob & { name: string }>();
 
+  const [bytesTransferred, setBytesTransferred] = useState('');
+  const [progress, setProgress] = useState('0');
+
   function imageChange(event: ChangeEvent<HTMLInputElement>) {
     event.preventDefault()
     if (!event.target) return;
@@ -22,9 +25,9 @@ export function PhotoUpload() {
 
     uploadTask.on('state_changed', taskSnapshot => {
       const percent = ((taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100).toFixed(0);
-      console.log(`percent ${percent}`);
+      setProgress(`percent ${percent}`);
 
-      console.log(`total bytes: ${taskSnapshot.bytesTransferred} transferido de ${taskSnapshot.totalBytes}`)
+      setBytesTransferred(`total bytes: ${taskSnapshot.bytesTransferred} transferido de ${taskSnapshot.totalBytes}`)
     })
 
     uploadTask.then(() => {
@@ -32,33 +35,26 @@ export function PhotoUpload() {
     )
   }
 
-  function handleProgressUploadImage() {
-    if (!selectedImage) return;
-
-    const storageRef = ref(storage, `images/${selectedImage.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, selectedImage);
-
-    return uploadTask
-	}; 
-
   return (
     <>
       <>
-      <input
-        accept="image/*"
-        type="file"
-        onChange={imageChange}
-      />
-      {selectedImage && (
-          <div >
+        {selectedImage && (
+          <div>
             <img
               src={URL.createObjectURL(selectedImage)}              
               alt="Thumb"
             />            
           </div>
         )}
+        <input
+          accept="image/*"
+          type="file"
+          onChange={imageChange}
+        />
       </>
       <button onClick={handleUploadPhoto}>Fazer Upload</button>
+      <h1>{progress}%</h1>
+      <h1>{bytesTransferred}</h1>
     </>
   )
 }
