@@ -1,9 +1,11 @@
-import { MdAddShoppingCart, MdOutlineCheck } from 'react-icons/md'
+import { MdOutlineCheck } from 'react-icons/md'
 import { IoMdTrash, IoMdReturnLeft } from 'react-icons/io'
 
 import { db } from '../services/firebase'
-import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { Header } from '../components/Header'
+import { FormBox } from '../components/FormBox'
 
 type ProductProps = {
   id: string;
@@ -13,8 +15,6 @@ type ProductProps = {
 }
 
 export function Products() {
-  const [description, setDescription] = useState('');
-  const [quantity, setQuantity] = useState(0);
   const [products, setProducts] = useState<ProductProps[]>([]);
 
   async function loadData() {
@@ -37,14 +37,6 @@ export function Products() {
       loadData()
     }, [])
 
-    async function handleAddProduct() {
-      await addDoc(collection(db, 'products'), {
-        description,
-        quantity,
-        done: false
-      })
-    }
-
     async function handleToggleDone(id: string, done: boolean) {
       await updateDoc(doc(db, 'products', id), {
         done: !done
@@ -57,31 +49,8 @@ export function Products() {
 
   return (
     <>
-      <div className="w-full h-24 bg-purple-700 flex items-end py-6 justify-center">
-        <h1 className="text-gray-200 font-semibold text-xl">Lista de Compras</h1>
-      </div>
-
-      <div className="m-4 flex justify-between">
-        <input 
-          type="text" 
-          placeholder="Nome do produto"
-          className="bg-gray-200 h-16 rounded-md px-2 w-3/4"
-          value={description} 
-          onChange={event => setDescription(event.target.value)}
-        />
-        <input 
-          type="text" 
-          placeholder="0"
-          className="bg-gray-200 h-16 w-12 rounded-md text-center"
-          onChange={event => setQuantity(Number(event.target.value))} 
-        />
-        <button
-          onClick={handleAddProduct}
-          className="bg-green-600 text-white text-2xl h-16 w-12 rounded-md flex items-center justify-center"
-        >
-          <MdAddShoppingCart />
-        </button>
-      </div>
+      <Header />
+      <FormBox />
 
       {products.map(product => (
         <div key={product.id} className="bg-gray-200 rounded-md flex w-5/6 mx-12 px-2 mb-4 h-20 items-center justify-between">
