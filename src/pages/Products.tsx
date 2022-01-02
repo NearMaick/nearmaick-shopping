@@ -37,7 +37,7 @@ export function Products() {
 
   return (
     <>
-      <Header />
+      <Header title="Lista de Produtos" />
       <FormBox />
 
       {products.map(product => (

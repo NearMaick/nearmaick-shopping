@@ -38,7 +38,7 @@ export function PhotoUpload() {
 
   return (
     <div className="flex flex-col">
-      <Header />
+      <Header title="Upload de fotos" />
       <>
         <div className="w-72 h-48 mx-auto my-4 rounded-md border-2 border-dashed">
           {selectedImage && (

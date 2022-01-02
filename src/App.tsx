@@ -4,7 +4,7 @@ import { Receipts } from "./pages/Receipts"
 
 function App() {
   return (
-    <PhotoUpload />
+    <Products />
   )
 }
 

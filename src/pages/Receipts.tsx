@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { ref, list, getDownloadURL } from 'firebase/storage'
 import { storage } from "../services/firebase";
+import { Header } from "../components/Header";
 
 export function Receipts() {
   const [urls, setUrls] = useState<string[]>([]);
@@ -29,14 +30,16 @@ export function Receipts() {
   }, [])
 
   return(
-    <>
-      <div>
-        {urls.map(url => (
-          <>
-          <img key={url} src={url} alt="" />
-          </>
-        ))}
-      </div>
-    </>
+    <div>
+      <Header title="Comprovantes" />
+      {urls.map(url => (          
+          <img
+            key={url}
+            src={url} 
+            alt="comprovantes"
+            className="my-2 px-2"
+          />          
+      ))}
+    </div>
   )
 }
